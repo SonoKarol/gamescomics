@@ -4,7 +4,7 @@
  * e i dati vivono in `.data/postgres` dentro il progetto. Niente sudo, niente Docker.
  */
 import { spawn } from "node:child_process"
-import { existsSync, readFileSync } from "node:fs"
+import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import EmbeddedPostgres from "embedded-postgres"
@@ -69,21 +69,45 @@ export async function startPostgres({ quiet = false } = {}) {
     fail("PostgreSQL non può essere avviato come root: lancia il comando dal tuo utente normale.")
   }
 
+  // Log di PostgreSQL: li mostriamo solo se l'avvio fallisce
+  const logs = []
+  const keep = (m) => {
+    logs.push(...String(m).trim().split("\n"))
+    if (logs.length > 40) logs.splice(0, logs.length - 40)
+  }
+
+
   const server = new EmbeddedPostgres({
     databaseDir: DATA_DIR,
     user: DB.user,
     password: DB.password,
     port: DB.port,
     persistent: true,
-    onLog: () => {},
-    onError: (e) => !quiet && info(String(e).trim()),
+    initdbFlags: ["--locale=C", "--encoding=UTF8", "--lc-messages=C"],
+    onLog: keep,
+    onError: keep,
   })
+
+  const explain = (phase, e) => {
+    console.error(`\n${color.red("✖")} PostgreSQL non è riuscito a ${phase}.`)
+    if (e?.message) console.error(`  ${e.message}`)
+    if (logs.length) {
+      console.error(color.dim("\n  Ultimi messaggi di PostgreSQL:"))
+      for (const l of logs.slice(-20)) console.error(color.dim(`    ${l}`))
+    }
+    console.error(
+      `\n  Se il database è danneggiato o creato su un altro sistema, ricrealo con:\n` +
+        `    rm -rf .data/postgres && npm run setup\n`
+    )
+    process.exit(1)
+  }
 
   if (!existsSync(join(DATA_DIR, "PG_VERSION"))) {
     if (!quiet) info("Prima esecuzione: inizializzo il database in .data/postgres ...")
-    await server.initialise()
+    await server.initialise().catch((e) => explain("inizializzare la cartella dati", e))
   }
-  await server.start()
+  forceCLocale()
+  await server.start().catch((e) => explain("avviarsi", e))
   if (!quiet) ok(`PostgreSQL portatile avviato su localhost:${DB.port}`)
 
   let stopped = false
@@ -92,6 +116,22 @@ export async function startPostgres({ quiet = false } = {}) {
     stopped = true
     await server.stop().catch(() => {})
   }
+}
+
+/**
+ * Locale "C" in postgresql.conf: esiste su qualunque sistema, a differenza di
+ * en_US.UTF-8 o it_IT.UTF-8 che dipendono da /etc/locale.gen. Con un locale
+ * mancante PostgreSQL si ferma subito ("invalid value for parameter lc_messages").
+ */
+function forceCLocale() {
+  const conf = join(DATA_DIR, "postgresql.conf")
+  if (!existsSync(conf)) return
+  const before = readFileSync(conf, "utf8")
+  const after = before.replace(
+    /^(lc_messages|lc_monetary|lc_numeric|lc_time)\s*=\s*'[^']*'/gm,
+    (_, key) => `${key} = 'C'`
+  )
+  if (after !== before) writeFileSync(conf, after)
 }
 
 /** Crea il database del negozio se non esiste. */
