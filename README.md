@@ -7,7 +7,7 @@ carte collezionabili, giochi da tavolo e gadget.
 |---|---|---|---|
 | Backend + API + pannello admin | [Medusa v2](https://docs.medusajs.com) (2.22) | `backend/` | http://localhost:9000 · admin su `/app` |
 | Negozio (storefront) | Next.js 15 + Tailwind + Motion + Lenis | `storefront/` | http://localhost:8000 |
-| Database | PostgreSQL 16 | `docker-compose.yml` | `localhost:5432` |
+| Database | PostgreSQL 16 (portatile, oppure Docker/sistema) | `scripts/`, `.data/` | `localhost:5432` |
 | Cache / eventi (produzione) | Redis 7 | `docker-compose.yml` | `localhost:6379` |
 | Pagamenti | Stripe (carte, Apple Pay, Google Pay…) | `backend/medusa-config.ts` | — |
 
@@ -15,45 +15,28 @@ carte collezionabili, giochi da tavolo e gadget.
 
 ## 1. Requisiti
 
-- **Node.js ≥ 20** (consigliato 22 LTS)
-- **PostgreSQL 16** e **Redis 7**: tramite Docker *oppure* installati nel sistema
+Solo **Node.js ≥ 20** (consigliato 22 LTS). PostgreSQL non va installato: il progetto
+usa una copia **portatile** (pacchetto npm `embedded-postgres`, dati in `.data/postgres`).
+
+## 2. Avvio
 
 ```bash
-# Opzione A — Docker
-docker compose up -d
-
-# Opzione B — Arch Linux, servizi nativi
-sudo pacman -S postgresql redis
-sudo -iu postgres initdb -D /var/lib/postgres/data
-sudo systemctl enable --now postgresql redis
-sudo -iu postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
-sudo -iu postgres createdb gamescomics
+npm run setup   # una volta: dipendenze, .env, database, tabelle, dati demo, chiave API, utente admin
+npm run dev     # ogni volta: PostgreSQL + backend (:9000) + negozio (:8000). Ctrl+C ferma tutto
 ```
 
-## 2. Primo avvio
+| Indirizzo | Cosa |
+|---|---|
+| http://localhost:8000 | Negozio |
+| http://localhost:9000/app | Pannello admin — credenziali in `.data/admin.txt` |
+| `postgres://postgres:postgres@localhost:5432/gamescomics` | Database (`npm run db` lo avvia da solo, per psql o un client grafico) |
 
-```bash
-# 1. Dipendenze
-npm run install:all
+`npm run setup` si può rilanciare senza danni: salta ciò che è già fatto.
 
-# 2. Variabili d'ambiente
-cp backend/.env.template backend/.env
-cp storefront/.env.template storefront/.env.local
-
-# 3. Schema del database + dati demo (regioni, IVA, spedizioni, catalogo)
-npm run db:setup
-#    → alla fine stampa NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_...
-#      copiala in storefront/.env.local
-
-# 4. Utente amministratore
-cd backend && npx medusa user -e admin@gamescomics.it -p <una-password> && cd ..
-
-# 5. Avvio (due terminali)
-npm run dev:backend      # http://localhost:9000/app  ← pannello admin
-npm run dev:storefront   # http://localhost:8000      ← negozio
-```
-
-> Lo storefront legge regioni e prodotti dal backend: avvia **prima** il backend.
+> **Hai già un PostgreSQL** (Docker con `docker compose up -d`, oppure di sistema)?
+> Se sulla porta 5432 risponde un server con utente `postgres` / password `postgres`,
+> gli script lo usano al posto di quello portatile. Per resettare i dati del database
+> portatile basta cancellare la cartella `.data/postgres` e rilanciare `npm run setup`.
 
 ## 3. Cosa c'è dentro
 
@@ -121,9 +104,10 @@ GamesAndComics/
 │       ├── app/[countryCode]/   pagine (home, store, categorie, prodotto, carrello, checkout, account, search)
 │       ├── modules/             componenti per area (home, layout, products, cart, checkout, account…)
 │       └── lib/                 data fetching, configurazione negozio, utility
+├── scripts/                 setup.mjs, dev.mjs, db.mjs (PostgreSQL portatile)
 ├── tools/                   script di supporto (generazione immagini)
 ├── docs/ROADMAP.md          prossime fasi
-└── docker-compose.yml       Postgres + Redis
+└── docker-compose.yml       Postgres + Redis (alternativa a quello portatile)
 ```
 
 ## 7. Pubblicare su GitHub

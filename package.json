@@ -3,13 +3,15 @@
   "private": true,
   "description": "Games & Comics Shop — e-commerce (Medusa v2 + Next.js)",
   "scripts": {
-    "install:all": "npm --prefix backend install && npm --prefix storefront install",
-    "db:up": "docker compose up -d",
-    "db:setup": "npm --prefix backend exec medusa db:migrate && npm --prefix backend run seed",
-    "dev:backend": "npm --prefix backend run dev",
-    "dev:storefront": "npm --prefix storefront run dev",
+    "setup": "npm install --no-audit --no-fund --loglevel=error && node scripts/setup.mjs",
+    "dev": "node scripts/dev.mjs",
+    "db": "node scripts/db.mjs",
     "build": "npm --prefix backend run build && npm --prefix storefront run build",
     "images": "node tools/generate-placeholders.mjs"
+  },
+  "devDependencies": {
+    "embedded-postgres": "16.14.0-beta.17",
+    "pg": "8.16.3"
   },
   "engines": {
     "node": ">=20"
