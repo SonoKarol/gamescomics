@@ -6,13 +6,24 @@
 import { spawn } from "node:child_process"
 import { existsSync } from "node:fs"
 import { join } from "node:path"
-import { BACKEND, STOREFRONT, color, fail, ok, readEnv, startPostgres, step, waitForUrl } from "./lib.mjs"
+import { BACKEND, ROOT, STOREFRONT, color, info, isSeeded, ok, readEnv, run, startPostgres, step, waitForUrl } from "./lib.mjs"
 
 const npm = process.platform === "win32" ? "npm.cmd" : "npm"
 
-const env = readEnv(join(STOREFRONT, ".env.local"))
-if (!existsSync(join(BACKEND, "node_modules")) || !env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY?.startsWith("pk_") || env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY === "pk_...") {
-  fail("Il progetto non è ancora configurato: lancia prima `npm run setup`.")
+/** Esegue `scripts/setup.mjs` (che avvia e ferma Postgres per conto suo). */
+async function runSetup(reason) {
+  console.log(`\n${color.yellow("▶")} ${color.bold(`Configurazione automatica: ${reason}`)}`)
+  await run(process.execPath, [join(ROOT, "scripts", "setup.mjs")], { cwd: ROOT, env: { GC_FROM_DEV: "1" } }).catch(() => {
+    console.error(`\n${color.red("✖")} Configurazione non riuscita: vedi i messaggi qui sopra.`)
+    process.exit(1)
+  })
+}
+
+const key = readEnv(join(STOREFRONT, ".env.local")).NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ?? ""
+if (!existsSync(join(BACKEND, "node_modules")) || !existsSync(join(STOREFRONT, "node_modules"))) {
+  await runSetup("dipendenze mancanti")
+} else if (!key.startsWith("pk_") || key === "pk_...") {
+  await runSetup("chiave API dello storefront mancante")
 }
 
 const children = []
@@ -63,6 +74,14 @@ process.on("SIGTERM", () => shutdown(0))
 
 step("Database")
 stopPostgres = await startPostgres()
+if (!(await isSeeded())) {
+  // Database nuovo o vuoto: setup completo, poi si riparte
+  info("Il database del negozio è vuoto o mancante.")
+  await stopPostgres()
+  await runSetup("database da creare")
+  step("Database")
+  stopPostgres = await startPostgres()
+}
 
 step("Backend Medusa")
 launch("backend", color.cyan, BACKEND)

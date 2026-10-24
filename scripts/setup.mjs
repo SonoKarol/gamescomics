@@ -121,7 +121,7 @@ try {
   await stopPostgres()
 }
 
-console.log(`
+if (!process.env.GC_FROM_DEV) console.log(`
 ${color.green(color.bold("Tutto pronto!"))} Avvia il progetto con:
 
   ${color.cyan("npm run dev")}

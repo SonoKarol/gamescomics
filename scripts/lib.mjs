@@ -148,6 +148,17 @@ export async function ensureDatabase() {
   await client.end()
 }
 
+/** true se il database del negozio esiste e contiene già i dati (seed fatto). */
+export async function isSeeded() {
+  try {
+    const rows = await query("SELECT 1 FROM region WHERE name = 'Italia' AND deleted_at IS NULL")
+    const users = await query('SELECT 1 FROM "user" WHERE deleted_at IS NULL LIMIT 1')
+    return rows.length > 0 && users.length > 0
+  } catch {
+    return false // database o tabelle mancanti
+  }
+}
+
 /** Esegue una query sul database del negozio. */
 export async function query(sql, params = []) {
   const client = new pg.Client({ ...DB, database: DB.name })
