@@ -1,0 +1,17 @@
+{
+  "name": "gamescomics",
+  "private": true,
+  "description": "Games & Comics Shop — e-commerce (Medusa v2 + Next.js)",
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix storefront install",
+    "db:up": "docker compose up -d",
+    "db:setup": "npm --prefix backend exec medusa db:migrate && npm --prefix backend run seed",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:storefront": "npm --prefix storefront run dev",
+    "build": "npm --prefix backend run build && npm --prefix storefront run build",
+    "images": "node tools/generate-placeholders.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

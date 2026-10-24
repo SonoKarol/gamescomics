@@ -1,0 +1,301 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@layer utilities {
+  /* Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  input:focus ~ label,
+  input:not(:placeholder-shown) ~ label {
+    @apply -translate-y-2 text-xsmall-regular;
+  }
+
+  input:focus ~ label {
+    @apply left-0;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    border: 1px solid #212121;
+    -webkit-text-fill-color: #212121;
+    -webkit-box-shadow: 0 0 0px 1000px #fff inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+  }
+}
+
+@layer components {
+  .content-container {
+    @apply max-w-[1360px] w-full mx-auto px-4 small:px-8;
+  }
+
+  .contrast-btn {
+    @apply px-4 py-2 border border-black rounded-full hover:bg-black hover:text-white transition-colors duration-200 ease-in;
+  }
+
+  .text-xsmall-regular {
+    @apply text-[10px] leading-4 font-normal;
+  }
+
+  .text-small-regular {
+    @apply text-xs leading-5 font-normal;
+  }
+
+  .text-small-semi {
+    @apply text-xs leading-5 font-semibold;
+  }
+
+  .text-base-regular {
+    @apply text-sm leading-6 font-normal;
+  }
+
+  .text-base-semi {
+    @apply text-sm leading-6 font-semibold;
+  }
+
+  .text-large-regular {
+    @apply text-base leading-6 font-normal;
+  }
+
+  .text-large-semi {
+    @apply text-base leading-6 font-semibold;
+  }
+
+  .text-xl-regular {
+    @apply text-2xl leading-[36px] font-normal;
+  }
+
+  .text-xl-semi {
+    @apply text-2xl leading-[36px] font-semibold;
+  }
+
+  .text-2xl-regular {
+    @apply text-[30px] leading-[48px] font-normal;
+  }
+
+  .text-2xl-semi {
+    @apply text-[30px] leading-[48px] font-semibold;
+  }
+
+  .text-3xl-regular {
+    @apply text-[32px] leading-[44px] font-normal;
+  }
+
+  .text-3xl-semi {
+    @apply text-[32px] leading-[44px] font-semibold;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   GAMES & COMICS SHOP — design system "vignetta"
+   Bordi d'inchiostro, ombre piene da stampa, retini a puntini, giallo del logo.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Le variabili dei componenti Medusa UI (bottoni, input, testi) vengono
+   ricolorate sul brand: così checkout e area clienti ereditano lo stile. */
+:root,
+html[data-mode="light"] {
+  --bg-base: #ffffff;
+  --bg-subtle: #fffdf6;
+  --bg-subtle-hover: #f3eedf;
+  --bg-field: #ffffff;
+  --bg-field-hover: #fffdf6;
+  --bg-interactive: #178cc6;
+  --bg-highlight: #fff3c4;
+  --fg-base: #15131a;
+  --fg-subtle: #3d3946;
+  --fg-muted: #6b6574;
+  --fg-interactive: #178cc6;
+  --fg-interactive-hover: #0f6f9f;
+  --border-base: #d9d3c2;
+  --border-strong: #15131a;
+  --border-interactive: #178cc6;
+  --button-inverted: #15131a;
+  --button-inverted-hover: #2b2733;
+  --button-inverted-pressed: #000000;
+  --button-neutral: #ffffff;
+  --button-neutral-hover: #fff3c4;
+}
+
+html {
+  background: #fffdf6;
+}
+
+body {
+  @apply bg-gc-paper text-gc-ink font-sans antialiased;
+}
+
+::selection {
+  background: #fbba00;
+  color: #15131a;
+}
+
+:focus-visible {
+  outline: 3px solid #178cc6;
+  outline-offset: 2px;
+}
+
+/* Lenis smooth scroll */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+@layer components {
+  /* Vignetta: il mattone base di tutta l'interfaccia */
+  .panel {
+    @apply bg-white border-[3px] border-gc-ink shadow-ink;
+  }
+
+  /* Retino tipografico a puntini (Ben-Day dots) */
+  .halftone {
+    background-image: radial-gradient(
+      rgba(21, 19, 26, 0.16) 1.2px,
+      transparent 1.6px
+    );
+    background-size: 12px 12px;
+  }
+  .halftone-light {
+    background-image: radial-gradient(
+      rgba(255, 255, 255, 0.35) 1.2px,
+      transparent 1.6px
+    );
+    background-size: 12px 12px;
+  }
+
+  /* Titoli in lettering da fumetto */
+  .comic-title {
+    @apply font-display tracking-[0.02em] leading-[0.95];
+  }
+  .comic-outline {
+    -webkit-text-stroke: 2px #15131a;
+    paint-order: stroke fill;
+    text-shadow: 4px 4px 0 #15131a;
+  }
+
+  /* Bottoni */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-6 h-12 font-display text-xl tracking-wide
+      border-[3px] border-gc-ink shadow-ink transition-[transform,box-shadow] duration-150
+      hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-ink-lg
+      active:translate-x-[2px] active:translate-y-[2px] active:shadow-none
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply bg-gc-yellow text-gc-ink;
+  }
+  .btn-ink {
+    @apply bg-gc-ink text-white;
+  }
+  .btn-light {
+    @apply bg-white text-gc-ink;
+  }
+
+  /* Balloon (nuvoletta) con codina */
+  .balloon {
+    @apply relative bg-white border-[3px] border-gc-ink rounded-[28px] shadow-ink;
+  }
+  .balloon::after {
+    content: "";
+    position: absolute;
+    left: 48px;
+    bottom: -22px;
+    width: 30px;
+    height: 24px;
+    background: #fff;
+    border-right: 3px solid #15131a;
+    border-bottom: 3px solid #15131a;
+    transform: skewX(-35deg);
+    border-bottom-right-radius: 4px;
+  }
+
+  /* Esplosione "POW" per etichette */
+  .burst {
+    clip-path: polygon(
+      50% 0, 61% 18%, 82% 7%, 79% 30%, 100% 34%, 85% 50%, 100% 66%, 79% 70%,
+      82% 93%, 61% 82%, 50% 100%, 39% 82%, 18% 93%, 21% 70%, 0 66%, 15% 50%,
+      0 34%, 21% 30%, 18% 7%, 39% 18%
+    );
+  }
+
+  .section-title {
+    @apply comic-title text-5xl small:text-6xl text-gc-ink;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Bottoni dei componenti Medusa UI (checkout, account) in stile vignetta */
+button.bg-ui-button-inverted,
+button.bg-ui-button-neutral {
+  border-radius: 0 !important;
+  border: 3px solid #15131a;
+  box-shadow: 3px 3px 0 0 #15131a !important;
+  font-family: "Bangers", Impact, sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.03em;
+  font-weight: 400;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+button.bg-ui-button-inverted {
+  background: #fbba00 !important;
+  color: #15131a !important;
+}
+button.bg-ui-button-inverted::after,
+button.bg-ui-button-neutral::after {
+  display: none;
+}
+button.bg-ui-button-inverted:hover:not(:disabled),
+button.bg-ui-button-neutral:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 0 #15131a !important;
+}
+
+/* Il lettering vince sempre sulle classi tipografiche dei componenti Medusa UI */
+.comic-title {
+  font-family: "Bangers", Impact, sans-serif !important;
+  font-weight: 400 !important;
+}
